@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+import glob
 
 package_name = 'stm_converter'
 
@@ -10,13 +11,16 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/resource/templates',
+        glob.glob('resource/templates/*.txt')),
     ],
     install_requires=['setuptools'],
     package_data={
-        "stm_converter": [
-            "resources/jinja_templates/*.txt",
+        package_name: [
+            "resources/templates/*.txt",
         ],
     },
+    include_package_data=True, 
     zip_safe=True,
     author='himaj joshi',
     author_email='himajjoshi932@gmail.com',
