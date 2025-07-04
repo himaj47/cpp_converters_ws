@@ -1,7 +1,6 @@
 from jinja2 import Environment, FileSystemLoader
-import importlib.resources as pkg_resources
 
-import stm_converter
+from ament_index_python.packages import get_package_share_directory
 import ros2interface.api as interface
 
 from rosidl_adapter.parser import MessageSpecification, PRIMITIVE_TYPES
@@ -11,7 +10,7 @@ from stm_converter.utils import get_msg_fields
 
 class ROSMsgGenerator: 
     def __init__(self, structs_found, struct_name, header:str, namespace, msg_description, msg: MessageSpecification, interface_name):
-        pathToTemplates = pkg_resources.files(stm_converter) / "resources/jinja_templates"
+        pathToTemplates = os.path.join(get_package_share_directory("stm_converter"), "resource/templates")
         self.env_ = Environment(loader=FileSystemLoader(pathToTemplates))
 
         self.structs_found_ = structs_found
@@ -85,7 +84,7 @@ class ROSMsgGenerator:
 
         if not is_present:
             print(f"{self.msg_filename_}.msg does not exist")
-            
+
         return is_present
 
 
