@@ -43,10 +43,10 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     )
 
     # TODO: update the destination
-    install(
-        FILES ${headerFile}
-        DESTINATION share/${PROJECT_NAME}/include
-    )
+    # install(
+    #     FILES ${headerFile}
+    #     DESTINATION share/${PROJECT_NAME}/include
+    # )
  
     add_custom_target(${TARGET_NAME}
         DEPENDS ${msg_description}
