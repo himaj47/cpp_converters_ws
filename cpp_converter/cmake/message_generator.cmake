@@ -33,7 +33,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     OUTPUT ${msg_description}
     COMMAND ${cmd}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    
+    DEPENDS ${FILE}
     COMMENT "Generating message description from ${FILE}" 
     )
 

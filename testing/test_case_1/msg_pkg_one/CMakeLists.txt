@@ -36,6 +36,9 @@ ament_target_dependencies(talker rclcpp std_msgs)
 convert_to_ros_msg(msg_generator include/msg_pkg_one/type_from_one.hpp)
 add_dependencies(talker msg_generator)
 
+convert_to_ros_msg(msg_generator2 include/msg_pkg_one/typedef_type.hpp)
+add_dependencies(talker msg_generator2)
+
 install(TARGETS
   talker
   DESTINATION lib/${PROJECT_NAME})
