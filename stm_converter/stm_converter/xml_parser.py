@@ -15,7 +15,8 @@ class xmlParser:
         # Configure the xml generator
         xml_generator_config = parser.xml_generator_configuration_t(
             xml_generator_path=generator_path,
-            xml_generator=generator_name)
+            xml_generator=generator_name,
+            cflags="-Wno-pragma-once-outside-header")
         
         self.filename = filename
         self.namespace = namespace
@@ -69,17 +70,41 @@ class xmlParser:
                     canonical_type = declarations.type_traits.remove_alias(var.decl_type)
 
                     # TODO: use isinstance() instead of type()
-                    if type(canonical_type) == declarations.cpptypes.int_t:
-                        field_type = "int64"
-
-                    elif type(canonical_type) == declarations.cpptypes.long_int_t:
-                        field_type = "int64"
-                    
-                    elif type(canonical_type) == declarations.cpptypes.float_t:
-                        field_type = "float64"
+                    if type(canonical_type) == declarations.cpptypes.char_t:
+                        field_type = "char"
 
                     elif type(canonical_type) == declarations.cpptypes.bool_t:
                         field_type = "bool"
+
+                    elif type(canonical_type) == declarations.cpptypes.signed_char_t:
+                        field_type = "int8"
+
+                    elif type(canonical_type) == declarations.cpptypes.unsigned_char_t:
+                        field_type = "uint8"
+
+                    elif type(canonical_type) == declarations.cpptypes.short_int_t:
+                        field_type = "int16"
+
+                    elif type(canonical_type) == declarations.cpptypes.short_unsigned_int_t:
+                        field_type = "uint16"    
+
+                    elif type(canonical_type) == declarations.cpptypes.int_t:
+                        field_type = "int32"
+
+                    elif type(canonical_type) == declarations.cpptypes.unsigned_int_t:
+                        field_type = "uint32"
+
+                    elif type(canonical_type) == declarations.cpptypes.long_int_t:
+                        field_type = "int64"
+
+                    elif type(canonical_type) == declarations.cpptypes.long_unsigned_int_t:
+                        field_type = "uint64"
+                    
+                    elif type(canonical_type) == declarations.cpptypes.float_t:
+                        field_type = "float32"
+
+                    elif type(canonical_type) == declarations.cpptypes.double_t:
+                        field_type = "float64"
 
                     elif str(canonical_type).startswith(VECTOR_TYPE_PREFIX):
                         vector_type = str(canonical_type).strip(VECTOR_TYPE_PREFIX).strip(VECTOR_TYPE_SUFFIX)
