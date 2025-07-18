@@ -144,23 +144,48 @@ def find_context_pkg(typename: str, header_name: str=None, pkg_name: str=DEFAULT
     return context_pkg, pathToFile, already_exists
 
 
+def check_if_primitve(typename: str):
+    field_type = ''
+
+    if typename in PRIMITIVE_TYPES: 
+        field_type += typename
+
+    elif typename == "double":
+        field_type += "float32"
+
+    elif typename == "u16string" or typename == "u32string":
+        field_type += "wstring"
+
+    elif typename + '32' in PRIMITIVE_TYPES:
+        field_type += typename + '32'
+
+    elif typename[-1] == 't' and typename[-2] == '_':
+        type = typename.strip("_t")
+        if type in PRIMITIVE_TYPES:
+            field_type += type
+
+    return field_type
+
+
 def process_non_primitives(typename: str, is_array=False, pkg_name:str =DEFAULT_INTERFACE_NAME, deps: list=None):
     field_type = ''
     context_pkg = ''
     msg_fields = {}
 
-    if typename in PRIMITIVE_TYPES: 
-        field_type += typename
+    field_type += check_if_primitve(typename)
 
-    elif typename + '64' in PRIMITIVE_TYPES: # example 64, it could be 8, 16, 32
-        field_type += typename + '64'
-
-    else:
+    if not field_type:
         field_type += typename
 
         # assuming namespace typed struct
         if field_type.find(SCOPE_RESOLUTION_OPR) != -1:
             namespace, field_type, typename = remove_namespace(field_type) 
+
+            type_ = check_if_primitve(typename)
+            # raise TypeError(f"field_type = {field_type} and type_ = {type_}")
+            if type_:
+                if is_array: type_ += "[]"
+                return context_pkg, msg_fields, type_
 
         pkg, path, already_exists = find_context_pkg(field_type, typename, pkg_name, deps)
         context_pkg += pkg
