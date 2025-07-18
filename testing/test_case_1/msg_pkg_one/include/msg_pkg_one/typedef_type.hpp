@@ -7,7 +7,7 @@ namespace ns {
     using funType = int;
     using funType2 = float;
 
-    struct type_from_one
+    struct typedef_type
     {
         funType a;
         funType2 b;
