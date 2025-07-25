@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/type_case_converter.cmake")
+
 function(convert_to_ros_msg TARGET_NAME FILE)
     set(generator_pkg stm_converter)
 
@@ -13,6 +15,10 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     get_filename_component(headerFile ${FILE} NAME)
 
     set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/${basename}_desc.yaml")
+    set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/${basename}_type_adapter.hpp")
+
+    snake_to_pascal("${headerFile}" out_string)
+    set(ros_msg "${out_string}.msg")
 
     execute_process(
         COMMAND ros2 pkg prefix ${generator_pkg}
@@ -30,7 +36,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
 
 
     add_custom_command(
-    OUTPUT ${msg_description}
+    OUTPUT ${msg_description} ${type_adapter} ${ros_msg}
     COMMAND ${cmd}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS ${FILE}
@@ -47,6 +53,16 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     #     FILES ${headerFile}
     #     DESTINATION share/${PROJECT_NAME}/include
     # )
+
+    install(
+        FILES ${type_adapter}
+        DESTINATION share/${PROJECT_NAME}/type_adapters
+    )
+
+    install(
+        FILES ${ros_msg}
+        DESTINATION share/${PROJECT_NAME}/msg
+    )
  
     add_custom_target(${TARGET_NAME}
         DEPENDS ${msg_description}
