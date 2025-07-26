@@ -26,8 +26,6 @@ class Parser:
         self.user_ns = ""
         self.struct_name = ""
 
-        self.structs = {}
-
         self.decls = parser.parse([filename], xml_generator_config)
         self.global_namespace = declarations.get_global_namespace(self.decls)
         self.namespaces = self.global_namespace.namespaces()
@@ -121,7 +119,5 @@ class Parser:
 
                     temp[decl.name].update({var.name: var_type})
 
-                self.structs.update(temp)
-
         msg = MessageSpecification(pkg_name=self.pkg_name, msg_name=msg_name, fields=fields, constants=[])
-        return self.structs, msg
+        return msg
