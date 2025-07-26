@@ -14,11 +14,14 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     get_filename_component(basename ${FILE} NAME_WE)
     get_filename_component(headerFile ${FILE} NAME)
 
+    set(description_file "${basename}_desc.yaml")
+    set(type_adapter_file "${basename}_type_adapter.hpp")
+
     set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/${basename}_desc.yaml")
     set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/${basename}_type_adapter.hpp")
 
-    snake_to_pascal("${headerFile}" out_string)
-    set(ros_msg "${out_string}.msg")
+    snake_to_pascal("${basename}" out_string)
+    set(ros_msg "${CMAKE_CURRENT_BINARY_DIR}/${out_string}.msg")
 
     execute_process(
         COMMAND ros2 pkg prefix ${generator_pkg}
@@ -27,7 +30,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     )
     set(msg_generator_path "${stm_converter_prefix}/lib/${generator_pkg}/${generator_pkg}")
 
-    set(cmd ${msg_generator_path} "${FILE}" --out-description "${msg_description}" --package "${PROJECT_NAME}")
+    set(cmd ${msg_generator_path} "${FILE}" --out-description "${msg_description}" --out-msg "${ros_msg}" --out-adapter "${type_adapter}" --package "${PROJECT_NAME}")
     if(PKG_DEPENDENCIES)
         message(WARNING "Package Dependencies: ${PKG_DEPENDENCIES}")
         string(REPLACE ";" " " deps_str "${PKG_DEPENDENCIES}")
