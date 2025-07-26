@@ -43,9 +43,9 @@ def main():
 
 
     parser = Parser(str(args.filename), pkg_name, namespace, dependencies)
-    structs_found, msg = parser.get_decls()
+    msg = parser.get_decls()
 
-    msg_gen = Generator(structs_found, parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
+    msg_gen = Generator(parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
     if msg_gen.check_existance():
         print(f"{msg_gen.msg_filename_}.msg exists\ntype: {msg_gen.interface_type_}")
 
