@@ -9,11 +9,10 @@ import os
 from stm_converter.utils import get_msg_fields
 
 class Generator: 
-    def __init__(self, structs_found, struct_name, header:str, namespace, msg: MessageSpecification, interface_name):
+    def __init__(self, struct_name, header:str, namespace, msg: MessageSpecification, interface_name):
         pathToTemplates = os.path.join(get_package_share_directory("stm_converter"), "resource/templates")
         self.env_ = Environment(loader=FileSystemLoader(pathToTemplates))
 
-        self.structs_found_ = structs_found
         self.header_name_ = header
         self.ns = namespace
         self.interface_name = interface_name
