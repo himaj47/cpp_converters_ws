@@ -3,6 +3,7 @@ from pygccxml import declarations
 from pygccxml import parser
 
 from rosidl_adapter.parser import MessageSpecification, Type, Field
+import ros2interface.api as interface
 
 from stm_converter.utils import generate_msg_name, process_non_primitives, get_msg_fields
 from stm_converter.utils import DECLARATION_PREFIX, VECTOR_TYPE_PREFIX, VECTOR_TYPE_SUFFIX
@@ -21,7 +22,10 @@ class Parser:
         self.filename = filename
         self.namespace = namespace
         self.pkg_name = pkg_name
+
+        # don't need this anymore
         self.deps = dependencies
+
         self.ns = None
         self.user_ns = ""
         self.struct_name = ""
@@ -30,6 +34,14 @@ class Parser:
         self.global_namespace = declarations.get_global_namespace(self.decls)
         self.namespaces = self.global_namespace.namespaces()
 
+        if dependencies:
+            try:
+                self.msg_interfaces = interface.get_message_interfaces(dependencies)
+            except Exception as e:
+                raise NameError("check dependencies!!")
+        
+        self.builtin_interface_pkgs = interface.get_interface_packages()
+        
         # if namespace provided by the user
         if namespace:
             self.ns = self.global_namespace.namespace(namespace)
@@ -110,7 +122,7 @@ class Parser:
 
                     else:
                         print(f"weird type found - {var.decl_type} - canonical type - {canonical_type}")
-                        context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), pkg_name=self.pkg_name, deps=self.deps)
+                        context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), pkg_name=self.pkg_name, deps=self.deps, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
                     
                     field_type = Type(field_type, context_package_name=context_pkg)
                     field = Field(type_=field_type, name=field_name)
