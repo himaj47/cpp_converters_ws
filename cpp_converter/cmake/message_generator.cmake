@@ -52,6 +52,8 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 
+    add_custom_target(${TARGET_NAME})
+
     rosidl_generate_interfaces(${PROJECT_NAME}
         msg/${out_string}.msg
         DEPENDENCIES ${PKG_DEPENDENCIES}
@@ -70,10 +72,6 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     install(
         FILES ${ros_msg}
         DESTINATION share/${PROJECT_NAME}/msg
-    )
-
-    add_custom_target(${TARGET_NAME}
-        DEPENDS ${msg_description} ${type_adapter} ${ros_msg}
     )
 
 endfunction()
