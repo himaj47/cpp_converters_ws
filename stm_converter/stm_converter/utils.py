@@ -100,8 +100,8 @@ def get_fields(already_exists: bool, pkg_name: str, path:str , name: str):
 
     return fields
 
-
-def find_context_pkg(typename: str, header_name: str=None, pkg_name: str=DEFAULT_INTERFACE_NAME, deps: list=None):
+# don't need deps parameter anymore
+def find_context_pkg(typename: str, header_name: str=None, pkg_name: str=DEFAULT_INTERFACE_NAME, deps: list=None, msg_interfaces=None, builtin_interfaces=None):
     # TODO: remove context_pkg -> no need, now checks from the dependencies
     context_pkg = ''
     pathToFile = ''
@@ -112,35 +112,18 @@ def find_context_pkg(typename: str, header_name: str=None, pkg_name: str=DEFAULT
     exists = False
     dependencies = []
 
-    if deps: dependencies = deps
-    else: dependencies.append(pkg_name)
+    is_present = False
+    # all builtin and generated msgs
+    for package, types in msg_interfaces.items():
+        if 'msg/' + typename in types:
+            is_present = True
+            context_pkg += package
+            pathToFile += builtin_interfaces[context_pkg] + f"/share/{context_pkg}/msg"
+            break
+    
+    if not is_present:
+        raise NameError(f"{typename}.msg doesn't exists!! check dependencies")
 
-    for pkg in dependencies:
-        current_dir = os.getcwd()
-        pathToPkg = current_dir + "/../../" + f"install/{pkg}/share/{pkg}/msg_descriptions"
-
-        if typename == header_name:
-            header_name = get_header_name(typename)
-        
-        # TODO parse the yaml file to check if msg exists 
-        full_path = os.path.join(pathToPkg, header_name + "_desc" + ".yaml")
-        
-        if os.path.exists(full_path):
-            exists |= True
-            context_pkg += pkg
-            # parsing the description yaml
-            with open(full_path, "r") as file:
-                data = file.read()
-                description: dict = yaml.load(data, yaml.SafeLoader)
-
-                # TODO update pathToFile - description[typename]["path"] or path = /install/.../share/.../msg/
-                pathToFile = description["path"]          
-
-    if not exists:
-        # TODO raise error!!
-        pass
-
-    # TODO remove context_pkg and check if var "already_exists" can be replaced with var "exists"
     return context_pkg, pathToFile, already_exists
 
 
@@ -166,8 +149,8 @@ def check_if_primitve(typename: str):
 
     return field_type
 
-
-def process_non_primitives(typename: str, is_array=False, pkg_name:str =DEFAULT_INTERFACE_NAME, deps: list=None):
+# don't need deps parameter anymore
+def process_non_primitives(typename: str, is_array=False, pkg_name:str =DEFAULT_INTERFACE_NAME, deps: list=None, msg_interfaces=None, builtin_interfaces=None):
     field_type = ''
     context_pkg = ''
     msg_fields = {}
@@ -187,7 +170,8 @@ def process_non_primitives(typename: str, is_array=False, pkg_name:str =DEFAULT_
                 if is_array: type_ += "[]"
                 return context_pkg, msg_fields, type_
 
-        pkg, path, already_exists = find_context_pkg(field_type, typename, pkg_name, deps)
+        # don't need deps parameter anymore
+        pkg, path, already_exists = find_context_pkg(field_type, typename, pkg_name, deps, msg_interfaces, builtin_interfaces)
         context_pkg += pkg
         msg_fields = get_fields(already_exists=already_exists, pkg_name=context_pkg, path=path, name=field_type)
 
