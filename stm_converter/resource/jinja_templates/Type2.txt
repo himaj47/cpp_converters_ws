@@ -1,8 +1,0 @@
-destination{{field}}.reserve(source{{field}}.size());
-
-for (const auto& value : source{{field}}) {
-    {%- if content %}
-    {{content}}
-    {%- endif %}
-    destination{{field}}.push_back(value);
-}
