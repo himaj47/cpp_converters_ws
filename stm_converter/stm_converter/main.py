@@ -45,14 +45,14 @@ def main():
     parser = Parser(str(args.filename), pkg_name, namespace, dependencies)
     msg = parser.get_decls()
 
-    msg_gen = Generator(parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
-    if msg_gen.check_existance():
-        print(f"{msg_gen.msg_filename_}.msg exists\ntype: {msg_gen.interface_type_}")
+    generator = Generator(parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
+    if generator.check_existance():
+        print(f"{generator.msg_filename_}.msg exists\ntype: {generator.interface_type_}")
 
     else:
-        msg_gen.gen_msgs(msg_with_path)
-        msg_gen.gen_type_adapter(type_adapter)
-        msg_gen.gen_msg_description(msg_description)
+        generator.gen_msgs(msg_with_path)
+        generator.gen_type_adapter(type_adapter)
+        generator.gen_msg_description(msg_description)
 
 if __name__ == "__main__":
     main()
