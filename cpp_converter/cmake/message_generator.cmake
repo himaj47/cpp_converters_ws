@@ -26,9 +26,11 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/${basename}_type_adapter.hpp")
 
     snake_to_pascal("${basename}" out_string)
-
-    set(ros_msg "${CMAKE_CURRENT_BINARY_DIR}/msg/${out_string}.msg")
+    
+    # set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
+    set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/")
     set(formatted_msg "${CMAKE_CURRENT_BINARY_DIR}:msg/${out_string}.msg")
+    message(WARNING "formatted_msg: ${formatted_msg}")
 
     execute_process(
         COMMAND ros2 pkg prefix ${generator_pkg}
@@ -52,10 +54,19 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
 
+    set(MSG_FILES "")
+
+    file(GLOB_RECURSE MSG_FILES_RECURSIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "msg/*.msg")
+    list(APPEND MSG_FILES ${MSG_FILES_RECURSIVE})
+    string(REPLACE ";" " " deps_str "${MSG_FILES}")
+
+    message(WARNING "msg files: ${MSG_FILES}")
+
+
     add_custom_target(${TARGET_NAME})
 
     rosidl_generate_interfaces(${PROJECT_NAME}
-        msg/${out_string}.msg
+        ${MSG_FILES}
         DEPENDENCIES ${PKG_DEPENDENCIES}
     )
 
@@ -70,7 +81,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     )
 
     install(
-        FILES ${ros_msg}
+        FILES ${MSG_FILES}
         DESTINATION share/${PROJECT_NAME}/msg
     )
 
