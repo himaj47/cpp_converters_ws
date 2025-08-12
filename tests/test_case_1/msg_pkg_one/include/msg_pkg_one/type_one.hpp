@@ -10,7 +10,7 @@ namespace ns {
     struct type_two
     {
         int a;
-        float b;
+        float c;
     };
     
 }
