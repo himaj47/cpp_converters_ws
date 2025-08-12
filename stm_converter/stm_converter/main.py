@@ -51,7 +51,7 @@ def main():
 
     # else:
     msg_gen.gen_msgs(msg_with_path)
-        # msg_gen.gen_type_adapter(type_adapter)
+    msg_gen.gen_type_adapter(type_adapter)
         # msg_gen.gen_msg_description(msg_description)
 
 if __name__ == "__main__":
