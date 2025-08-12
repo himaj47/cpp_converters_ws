@@ -30,15 +30,18 @@ class Parser:
         self.user_ns = ""
         self.struct_name = ""
 
+        self.msg_interfaces = None
+
         self.decls = parser.parse([filename], xml_generator_config)
         self.global_namespace = declarations.get_global_namespace(self.decls)
         self.namespaces = self.global_namespace.namespaces()
 
-        if dependencies:
+        # raise NameError(f"dependencies = {dependencies}")
+        if dependencies != ["None"]:
             try:
                 self.msg_interfaces = interface.get_message_interfaces(dependencies)
             except Exception as e:
-                raise NameError("check dependencies!!")
+                raise NameError(f"check dependencies!! {e}")
         
         self.builtin_interface_pkgs = interface.get_interface_packages()
         
@@ -55,6 +58,9 @@ class Parser:
     def get_decls(self):
         msg_name = ''
         fields = []
+        msgs = []
+        test_canonical_types = []
+        test_msg_names = []
 
         for decl in self.ns.declarations:
             # TODO: check for opaque types
@@ -65,7 +71,11 @@ class Parser:
                 temp = {decl.name: {}}
                 self.struct_name = decl.name
 
-                msg_name += generate_msg_name(decl.name)
+                msg_name = generate_msg_name(decl.name)
+                test_msg_names.append(msg_name)
+                # raise NameError(f"msg_name = {msg_name}")
+
+                test_msg_fields = []
                 context_pkg = None
 
                 for var in decl.variables():
@@ -123,13 +133,19 @@ class Parser:
                     else:
                         print(f"weird type found - {var.decl_type} - canonical type - {canonical_type}")
                         context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), pkg_name=self.pkg_name, deps=self.deps, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
-                    
+
+                    test_canonical_types.append(field_type)
                     field_type = Type(field_type, context_package_name=context_pkg)
                     field = Field(type_=field_type, name=field_name)
                     field.msg_fields = msg_fields
                     fields.append(field)
 
+                    test_msg_fields.append(msg_fields)
+
                     temp[decl.name].update({var.name: var_type})
 
-        msg = MessageSpecification(pkg_name=self.pkg_name, msg_name=msg_name, fields=fields, constants=[])
-        return msg
+        # raise ValueError(f"fields: {test_canonical_types}, msg_names = {test_msg_names}")
+            msg = MessageSpecification(pkg_name=self.pkg_name, msg_name=msg_name, fields=fields, constants=[])
+            msgs.append(msg)
+            fields = []
+        return msgs
