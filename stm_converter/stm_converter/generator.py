@@ -3,10 +3,12 @@ from jinja2 import Environment, FileSystemLoader
 from ament_index_python.packages import get_package_share_directory
 import ros2interface.api as interface
 
-from rosidl_adapter.parser import MessageSpecification, PRIMITIVE_TYPES
+from rosidl_adapter.parser import MessageSpecification
 import yaml
 import os 
-from stm_converter.utils import get_msg_fields, MESSAGE_FILE_EXTENSION
+
+from stm_converter.utils import get_msg_fields
+from stm_converter.utils import MESSAGE_FILE_EXTENSION
 
 class Generator: 
     def __init__(self, struct_name, header:str, namespace, msg: MessageSpecification, interface_name):
@@ -18,47 +20,47 @@ class Generator:
         self.interface_name = interface_name
 
         # self.msg_filename_ = msg.msg_name 
-        self.msg_content_ = tuple()
+        self.msg_content_ = list()
         self.interface_type_ = None
         self.msg = msg
         self.struct_name = struct_name
 
 
     def gen_msgs(self, file: str):
-        # raise TypeError(f"gen_msgs() msg")
         template = self.env_.get_template("message.txt")
-        
-        # filename = self.msg.msg_name + ".msg"
-        # if len(self.msg) == 1:
-        #     filename = file
 
-        # raise NameError(f"msgs found = {self.msg[1].msg_name}")
+        try:
+            os.mkdir("msg")
+        except FileExistsError:
+            print(f"file already exists!!")
 
         for msg in self.msg:
-            self.msg_content_ = get_msg_fields(msg)
+            self.msg_content_.append(get_msg_fields(msg))
 
-            context = {"msg": self.msg_content_}
+            context = {"msg": self.msg_content_[-1]}
 
             # with open(filename, mode="w", encoding="utf-8") as output:
-            with open(file + msg.msg_name + MESSAGE_FILE_EXTENSION, mode="w", encoding="utf-8") as output:
-                    output.write(template.render(context))
+            with open("msg/" + msg.msg_name + MESSAGE_FILE_EXTENSION, mode="w", encoding="utf-8") as output:
+                output.write(template.render(context))
 
 
-    # def gen_type_adapter(self, file: str): # use struct name from xmlParser class
-    #     template = self.env_.get_template("type_adapter.txt")
-    #     context = {"header": self.header_name_, 
-    #                "msg_file_name": self.msg.msg_name,
-    #                "struct_name": self.struct_name,
-    #                "msg": self.msg_content_,
-    #                "namespace": self.ns,
-    #                "interface_name": self.interface_name
-    #                }
-        
-    #     # temp_file_name = f"{self.header_name_}_type_adapter.hpp"
-    #     filename = file
-        
-    #     with open(filename, mode="w", encoding="utf-8") as output:
-    #             output.write(template.render(context))
+    def gen_type_adapter(self, file: str):
+        msg_count = 0
+        template = self.env_.get_template("type_adapter.txt")
+
+        for msg_content in self.msg_content_:
+            context = {"header": self.header_name_, 
+                    "msg_file_name": self.msg[msg_count].msg_name,
+                    "struct_name": self.struct_name[msg_count],
+                    "msg": msg_content,
+                    "namespace": self.ns, # currently assuming that all structs are under the same namespace
+                    "interface_name": self.interface_name
+                    }
+            
+            with open(file + self.struct_name[msg_count] + "_type_adapter.hpp", mode="w", encoding="utf-8") as output:
+                output.write(template.render(context))
+            
+            msg_count += 1
 
 
     # def gen_msg_description(self, file: str):
@@ -96,4 +98,3 @@ class Generator:
                 print(f"{msg_filename_.msg_name}.msg does not exist")
 
         return is_present
-
