@@ -1,5 +1,5 @@
 #include <rclcpp/type_adapter.hpp>
-#include "{{interface_name}}/msg/{{header}}.hpp"
+#include "{{interface_name}}/msg/{{struct_name}}.hpp"
 #include "{{header}}.hpp"
 
 template<>
