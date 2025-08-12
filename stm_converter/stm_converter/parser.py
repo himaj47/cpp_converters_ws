@@ -28,7 +28,7 @@ class Parser:
 
         self.ns = None
         self.user_ns = ""
-        self.struct_name = ""
+        self.struct_name = list()
 
         self.msg_interfaces = None
 
@@ -36,7 +36,6 @@ class Parser:
         self.global_namespace = declarations.get_global_namespace(self.decls)
         self.namespaces = self.global_namespace.namespaces()
 
-        # raise NameError(f"dependencies = {dependencies}")
         if dependencies != ["None"]:
             try:
                 self.msg_interfaces = interface.get_message_interfaces(dependencies)
@@ -69,11 +68,10 @@ class Parser:
             if isinstance(decl, declarations.class_t):
                 if str(decl.name).startswith(DECLARATION_PREFIX): continue
                 temp = {decl.name: {}}
-                self.struct_name = decl.name
+                self.struct_name.append(decl.name)
 
                 msg_name = generate_msg_name(decl.name)
                 test_msg_names.append(msg_name)
-                # raise NameError(f"msg_name = {msg_name}")
 
                 test_msg_fields = []
                 context_pkg = None
@@ -144,7 +142,6 @@ class Parser:
 
                     temp[decl.name].update({var.name: var_type})
 
-        # raise ValueError(f"fields: {test_canonical_types}, msg_names = {test_msg_names}")
             msg = MessageSpecification(pkg_name=self.pkg_name, msg_name=msg_name, fields=fields, constants=[])
             msgs.append(msg)
             fields = []
