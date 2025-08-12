@@ -23,7 +23,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/type_adapters")
 
     set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions/${basename}_desc.yaml")
-    set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/${basename}_type_adapter.hpp")
+    set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/")
 
     snake_to_pascal("${basename}" out_string)
     
@@ -55,12 +55,19 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     )
 
     set(MSG_FILES "")
+    set(TYPE_ADAPTERS "")
 
     file(GLOB_RECURSE MSG_FILES_RECURSIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "msg/*.msg")
+    file(GLOB_RECURSE TYPE_ADAPTERS_RECURSIVE "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/*_type_adapter.hpp")
+
     list(APPEND MSG_FILES ${MSG_FILES_RECURSIVE})
+    list(APPEND TYPE_ADAPTERS ${TYPE_ADAPTERS_RECURSIVE})
+
     string(REPLACE ";" " " deps_str "${MSG_FILES}")
+    string(REPLACE ";" " " deps_str "${TYPE_ADAPTERS}")
 
     message(WARNING "msg files: ${MSG_FILES}")
+    message(WARNING "type adapter files: ${TYPE_ADAPTERS}")
 
 
     add_custom_target(${TARGET_NAME})
@@ -70,13 +77,13 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         DEPENDENCIES ${PKG_DEPENDENCIES}
     )
 
-    install(
-        FILES ${msg_description}
-        DESTINATION share/${PROJECT_NAME}/msg_descriptions
-    )
+    # install(
+    #     FILES ${msg_description}
+    #     DESTINATION share/${PROJECT_NAME}/msg_descriptions
+    # )
 
     install(
-        FILES ${type_adapter}
+        FILES ${TYPE_ADAPTERS}
         DESTINATION share/${PROJECT_NAME}/type_adapters
     )
 
