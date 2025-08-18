@@ -13,7 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(cpp_converter REQUIRED)
-# find_package(msg_pkg_one REQUIRED)
+find_package(msg_pkg_one REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -34,14 +34,17 @@ include_directories(
 add_executable(talker src/simplePublisher.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
 
-convert_to_ros_msg(msg_generator include/msg_pkg_one/type_from_one.hpp)
-add_dependencies(talker msg_generator)
+# convert_to_ros_msg(msg_generator include/msg_pkg_one/type_from_one.hpp)
+# add_dependencies(talker msg_generator)
 
 # convert_to_ros_msg(msg_generator2 include/msg_pkg_one/typedef_type.hpp DEPENDENCIES msg_pkg_one)
 # add_dependencies(talker msg_generator2)
 
-convert_to_ros_msg(msg_generator3 include/msg_pkg_one/type_one.hpp)
-add_dependencies(talker msg_generator3)
+# convert_to_ros_msg(msg_generator3 include/msg_pkg_one/type_one.hpp)
+# add_dependencies(talker msg_generator3)
+
+convert_to_ros_msg(msg_generator4 include/msg_pkg_one/type_from_two.hpp DEPENDENCIES msg_pkg_one)
+add_dependencies(talker msg_generator4)
 
 install(TARGETS
   talker
