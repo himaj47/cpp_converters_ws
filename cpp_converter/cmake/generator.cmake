@@ -1,4 +1,4 @@
-include("${CMAKE_CURRENT_LIST_DIR}/type_case_converter.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/generate_msg_name.cmake")
 find_package(rosidl_default_generators REQUIRED)
 
 function(convert_to_ros_msg TARGET_NAME FILE)
