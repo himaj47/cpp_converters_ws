@@ -1,3 +1,12 @@
+"""ROS2 Message and type adapter generator.
+
+This module uses Jinja2 templates to generate:
+    - `msg` files from parsed message specifications.
+    - Type adapter C++ header files for custom message integration.
+
+It transforms C++ struct definitions into ROS 2 message definitions and supporting adapter code.
+""" 
+
 from jinja2 import Environment, FileSystemLoader
 
 from ament_index_python.packages import get_package_share_directory
@@ -11,7 +20,29 @@ from stm_converter.utils import get_msg_fields
 from stm_converter.utils import MESSAGE_FILE_EXTENSION
 
 class Generator: 
+    """Generates ROS 2 message files and type adapters from parsed C++ structs.
+
+    Attributes:
+        - ``env_`` (jinja2.Environment): Jinja2 environment for loading templates.
+        - ``header_name_`` (str): C++ header file name.
+        - ``ns`` (str): Namespace of the struct.
+        - ``interface_name`` (str): Target ROS 2 interface name.
+        - ``msg_content_`` (list[dict]): List of parsed message fields for each message.
+        - ``msg`` (list[MessageSpecification]): Parsed ROS 2 message specifications.
+        - ``struct_name`` (list[str]): C++ struct names found.
+    """
+
     def __init__(self, struct_name, header:str, namespace, msg: MessageSpecification, interface_name):
+        """Initialize the generator with message and template configuration.
+
+        Args:
+            - ``struct_name`` (list[str]): Names of C++ structs.
+            - ``header`` (str): Header file name containing the definitions.
+            - ``namespace`` (str): Namespace of the C++ definitions.
+            - ``msg`` (list[MessageSpecification]): Parsed message specifications.
+            - ``interface_name`` (str): Target ROS 2 interface name for generated files.
+        """
+
         pathToTemplates = os.path.join(get_package_share_directory("stm_converter"), "resource/templates")
         self.env_ = Environment(loader=FileSystemLoader(pathToTemplates))
 
@@ -27,6 +58,15 @@ class Generator:
 
 
     def gen_msgs(self, file: str):
+        """Generate `ROS msg` files from parsed message specifications.
+
+        Uses the `message.txt` Jinja2 template to generate ROS2 msg files
+        from parsed message field data.
+
+        Args:
+            - ``file`` (str): Not currently used.
+        """
+
         template = self.env_.get_template("message.txt")
 
         try:
@@ -45,6 +85,14 @@ class Generator:
 
 
     def gen_type_adapter(self, file: str):
+        """Generate C++ type adapter headers for the generated messages.
+
+        Uses the `type_adapter.txt` Jinja2 template to generate type adapter
+
+        Args:
+            - ``file`` (str): Output directory and prefix for the adapter file names.
+        """
+
         msg_count = 0
         template = self.env_.get_template("type_adapter.txt")
 
@@ -82,6 +130,14 @@ class Generator:
 
 
     def check_existance(self): # use find_content_pkg function from xml_parser
+        """Check if the target message types already exist.
+
+        This checks all interface packages to see if any of the msgs exists
+
+        Returns:
+            ``bool``: True if all messages exist, False otherwise.
+        """
+
         is_present = False
         pkgs = list(interface.get_interface_packages().keys())
 

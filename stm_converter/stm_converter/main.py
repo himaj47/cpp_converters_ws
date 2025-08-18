@@ -1,9 +1,30 @@
+"""CLI entry point for stm_converter.
+
+This script converts C++ struct definitions into ROS2 msg message files and generate their corresponding type adapters and optionally message description YAML files.
+
+It uses the `Parser` class to extract message definitions from C++ headers and the
+`Generator` class to produce ROS 2 artifacts based on Jinja2 templates.
+
+Example:
+    ```bash
+    python3 main.py my_structs.hpp --namespace my_namespace --out-description msg_desc.yaml --out-msg msg/MyMessage.msg --out-adapter adapters/ --package my_ros_pkg --deps std_msgs sensor_msgs
+    ```
+"""
+
 import argparse
 from pathlib import Path
 from stm_converter.parser import Parser
 from stm_converter.generator import Generator
 
 def main():
+    """
+    Parses command-line arguments, processes the given C++ headers,
+    and generates ROS 2 message files and type adapters.
+
+    Raises:
+        ``ValueError``: If required arguments are missing.
+    """
+
     desc = "stm_converter arguments"
     parser = argparse.ArgumentParser(description=desc)
 
