@@ -22,7 +22,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/type_adapters")
 
-    set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions/${basename}_desc.yaml")
+    set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions/")
     set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/")
 
     snake_to_pascal("${basename}" out_string)
