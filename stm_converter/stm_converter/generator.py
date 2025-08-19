@@ -17,7 +17,7 @@ import yaml
 import os 
 
 from stm_converter.utils import get_msg_fields
-from stm_converter.utils import MESSAGE_FILE_EXTENSION
+from stm_converter.utils import MESSAGE_FILE_EXTENSION, PRIMITIVE_TYPES
 
 class Generator: 
     """Generates ROS 2 message files and type adapters from parsed C++ structs.
@@ -111,22 +111,24 @@ class Generator:
             msg_count += 1
 
 
-    # def gen_msg_description(self, file: str):
-    #     filename = file
-    #     content = {}
+    def gen_msg_description(self, file: str):
+        """Generate msg descriptions (YAML) for the generated messages.
 
-    #     content["fields"] = {}
-    #     for field in self.msg.fields:
-    #         if field.type.type not in PRIMITIVE_TYPES:
-    #             pass
-    #         content["fields"].update({field.name: field.type.type})
+        Args:
+            - ``file`` (str): Output directory and prefix for the msg description file names.
+        """
+        content = {}
 
-    #     # TODO update content path to .../share/<project_name>/msg/ if required
-    #     # content["path"] = os.path.abspath(relative_path)
-    #     content["path"] = os.getcwd()
+        for msg in self.msg:
+            content["header"] = self.header_name_ + '.hpp'
+            content["fields"] = {}
+            for field in msg.fields:
+                if field.type.type not in PRIMITIVE_TYPES:
+                    pass
+                content["fields"].update({field.name: field.type.type})
 
-    #     with open(filename, mode="w", encoding="utf-8") as output:
-    #             output.write(yaml.dump(content))
+            with open(file + self.header_name_ + '_desc.yaml', mode="w", encoding="utf-8") as output:
+                    output.write(yaml.dump(content))
 
 
     def check_existance(self): # use find_content_pkg function from xml_parser
