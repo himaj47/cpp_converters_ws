@@ -1,0 +1,14 @@
+bool a
+char b
+float32 c
+float64 d
+int32 e
+uint8 f
+int16 g
+uint16 h
+int32 i
+uint32 j
+int64 k
+uint64 l
+string m
+wstring n
