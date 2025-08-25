@@ -77,6 +77,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         DEPENDENCIES ${PKG_DEPENDENCIES}
     )
 
+    ament_export_dependencies(rosidl_default_runtime)
     # install(
     #     FILES ${msg_description}
     #     DESTINATION share/${PROJECT_NAME}/msg_descriptions
@@ -84,12 +85,17 @@ function(convert_to_ros_msg TARGET_NAME FILE)
 
     install(
         FILES ${TYPE_ADAPTERS}
-        DESTINATION share/${PROJECT_NAME}/type_adapters
+        DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/type_adapters
     )
 
+    # install(
+    #     FILES ${MSG_FILES}
+    #     DESTINATION share/${PROJECT_NAME}/msg
+    # )
+
     install(
-        FILES ${MSG_FILES}
-        DESTINATION share/${PROJECT_NAME}/msg
+        FILES ${FILE}
+        DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/headers
     )
 
 endfunction()
