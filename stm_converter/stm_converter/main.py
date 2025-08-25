@@ -48,14 +48,14 @@ def main():
     if args.namespace:
         namespace = args.namespace
 
-    msg_description = args.out_description
+    msg_description_prefix_path = args.out_description
     msg_with_path = args.out_msg
     type_adapter = args.out_adapter
     pkg_name = args.package
 
     if not pkg_name:
         raise ValueError("Package name (--package) is required and was not set!")
-    if not msg_description:
+    if not msg_description_prefix_path:
         raise ValueError("msg description (--out-description) is required and was not set!")
     if not msg_with_path:
         raise ValueError("msg name (--out-msg) is required and was not set!")
@@ -68,12 +68,12 @@ def main():
 
     generator = Generator(parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
     if generator.check_existance():
-        print(f"{generator.msg_filename_}.msg exists\ntype: {generator.interface_type_}")
+        print(f"msg exists\ntype: {generator.interface_type_}")
 
     else:
         generator.gen_msgs(msg_with_path)
         generator.gen_type_adapter(type_adapter)
-        generator.gen_msg_description(msg_description)
+        generator.gen_msg_description(msg_description_prefix_path)
 
 if __name__ == "__main__":
     main()
