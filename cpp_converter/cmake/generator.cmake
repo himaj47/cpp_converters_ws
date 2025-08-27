@@ -74,6 +74,7 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     add_custom_target(${TARGET_NAME})
 
     set(MSG_GEN_MSG_FILES "${MSG_FILES}" PARENT_SCOPE)
+    set(MSG_GEN_MSG_TYPE_ADAPTERS "${TYPE_ADAPTERS}" PARENT_SCOPE)
 endfunction()
 
 macro(convert_to_ros_msg TARGET_NAME FILE)
@@ -96,7 +97,7 @@ macro(convert_to_ros_msg TARGET_NAME FILE)
     # )
 
     install(
-        FILES ${TYPE_ADAPTERS}
+        FILES ${MSG_GEN_MSG_TYPE_ADAPTERS}
         DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/type_adapters
     )
 

@@ -1,7 +1,7 @@
 #include <memory>
 
 #include "rclcpp/rclcpp.hpp"
-#include "msg_pkg_two/type_adapters/my_test_msg_type_adapter.hpp" 
+#include <msg_pkg_two/type_adapters/my_test_msg_type_adapter.hpp>
 
 using std::placeholders::_1;
 using myAdaptedType = rclcpp::TypeAdapter<nspace::my_test_msg, msg_pkg_two::msg::MyTestMsg>;
@@ -17,7 +17,7 @@ class MinimalSubscriber : public rclcpp::Node
     }
 
   private:
-    void topic_callback(const msg_pkg_two::msg::MyTestMsg & msg) const
+    void topic_callback(const nspace::my_test_msg & msg) const
     {
       RCLCPP_INFO(this->get_logger(), "I heard: '%d', '%c", msg.a, msg.b); 
     }
