@@ -33,14 +33,21 @@ include_directories(
 )
 
 add_executable(pub src/publisher.cpp)
-ament_target_dependencies(pub rclcpp std_msgs msg_pkg_two rosidl_default_runtime)
+add_executable(sub src/subscriber.cpp)
 
-# rosidl_get_typesupport_target(cpp_typesupport_target
-#   msg_pkg_two "rosidl_typesupport_cpp")
+target_link_libraries(
+  pub
+  "/home/himaj/cpp_converters_ws/install/msg_pkg_two/lib/libmsg_pkg_two__rosidl_typesupport_cpp.so"
+)
+target_link_libraries(
+  sub
+  "/home/himaj/cpp_converters_ws/install/msg_pkg_two/lib/libmsg_pkg_two__rosidl_typesupport_cpp.so"
+)
 
-# target_link_libraries(pub "${cpp_typesupport_target}")
+ament_target_dependencies(pub rclcpp msg_pkg_two)
+ament_target_dependencies(sub rclcpp msg_pkg_two)
 
-install(TARGETS pub
+install(TARGETS pub sub
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
