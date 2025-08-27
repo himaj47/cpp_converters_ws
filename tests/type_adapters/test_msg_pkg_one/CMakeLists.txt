@@ -35,14 +35,6 @@ include_directories(
 add_executable(pub src/publisher.cpp)
 add_executable(sub src/subscriber.cpp)
 
-target_link_libraries(
-  pub
-  "/home/himaj/cpp_converters_ws/install/msg_pkg_two/lib/libmsg_pkg_two__rosidl_typesupport_cpp.so"
-)
-target_link_libraries(
-  sub
-  "/home/himaj/cpp_converters_ws/install/msg_pkg_two/lib/libmsg_pkg_two__rosidl_typesupport_cpp.so"
-)
 
 ament_target_dependencies(pub rclcpp msg_pkg_two)
 ament_target_dependencies(sub rclcpp msg_pkg_two)
