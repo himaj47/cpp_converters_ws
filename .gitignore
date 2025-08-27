@@ -4,3 +4,9 @@ stm_converter/stm_converter/__pycache__/
 stm_converter/docs/_build/
 stm_converter/docs/_static/
 stm_converter/docs/_templates/
+build
+install
+log
+.kdev4
+*.kdev4
+
