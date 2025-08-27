@@ -1,17 +1,17 @@
 include("${CMAKE_CURRENT_LIST_DIR}/generate_msg_name.cmake")
 find_package(rosidl_default_generators REQUIRED)
 
-function(convert_to_ros_msg TARGET_NAME FILE)
+function(convert_to_ros_msg_helper TARGET_NAME FILE)
     set(generator_pkg stm_converter)
 
     set(options)
     set(one_value_keywords)
     set(deps DEPENDENCIES)
 
-    cmake_parse_arguments(PARSE_ARGV 0 PKG 
+    cmake_parse_arguments(PARSE_ARGV 0 PKG
         "${options}" "${one_value_keywords}" "${deps}"
     )
-    
+
     get_filename_component(basename ${FILE} NAME_WE)
     get_filename_component(headerFile ${FILE} NAME)
 
@@ -26,7 +26,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
     set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/")
 
     snake_to_pascal("${basename}" out_string)
-    
+
     # set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
     set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/")
     set(formatted_msg "${CMAKE_CURRENT_BINARY_DIR}:msg/${out_string}.msg")
@@ -45,6 +45,7 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         message(WARNING "Package Dependencies: ${PKG_DEPENDENCIES}")
         string(REPLACE ";" " " deps_str "${PKG_DEPENDENCIES}")
         list(APPEND cmd --deps "${deps_str}")
+        set(MSG_GENT_PKG_DEPENDENCIES ${PKG_DEPENDENCIES} PARENT_SCOPE)
     endif()
 
     set(msg_src "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
@@ -72,9 +73,20 @@ function(convert_to_ros_msg TARGET_NAME FILE)
 
     add_custom_target(${TARGET_NAME})
 
+    set(MSG_GEN_MSG_FILES "${MSG_FILES}" PARENT_SCOPE)
+endfunction()
+
+macro(convert_to_ros_msg TARGET_NAME FILE)
+
+    convert_to_ros_msg_helper(${TARGET_NAME} ${FILE})
+
+    message("PROJECT_NAME: ${PROJECT_NAME}")
+    message("MSG_FILES: ${MSG_GEN_MSG_FILES}")
+    message("PKG_DEPENDENCIES: ${MSG_GENT_PKG_DEPENDENCIES}")
+
     rosidl_generate_interfaces(${PROJECT_NAME}
-        ${MSG_FILES}
-        DEPENDENCIES ${PKG_DEPENDENCIES}
+        ${MSG_GEN_MSG_FILES}
+        DEPENDENCIES ${MSG_GENT_PKG_DEPENDENCIES}
     )
 
     ament_export_dependencies(rosidl_default_runtime)
@@ -97,5 +109,4 @@ function(convert_to_ros_msg TARGET_NAME FILE)
         FILES ${FILE}
         DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/headers
     )
-
-endfunction()
+endmacro()
