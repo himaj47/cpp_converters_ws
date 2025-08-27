@@ -27,7 +27,7 @@ class MinimalPublisher : public rclcpp::Node
       message.data = "Hello, world! " + std::to_string(count_++);
       count_++;
 
-      RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data);
+      RCLCPP_INFO_STREAM(this->get_logger(), "Publishing: " << message.data);
       publisher_->publish(message);
     }
     rclcpp::TimerBase::SharedPtr timer_;
