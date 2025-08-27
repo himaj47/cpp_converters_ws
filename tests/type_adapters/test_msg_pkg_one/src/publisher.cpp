@@ -1,10 +1,5 @@
 #include <chrono>
-#include <functional>
-#include <memory>
-#include <string>
-
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
 
 #include "msg_pkg_two/type_adapters/my_test_msg_type_adapter.hpp" 
 
