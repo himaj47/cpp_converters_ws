@@ -24,15 +24,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-
-include_directories(
-  include
-)
-
 add_executable(talker src/simplePublisher.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
 
-convert_to_ros_msg(msg_generator include/use_msg_pkg_three/use_num.hpp)
+convert_to_ros_msg(msg_generator include/use_msg_pkg_three/use_num.hpp DEPENDENCIES msg_pkg_three)
 add_dependencies(talker msg_generator)
 
 install(TARGETS
@@ -43,6 +38,5 @@ ament_export_include_directories(
   include
   include/${PROJECT_NAME}
 )
-
 
 ament_package()
