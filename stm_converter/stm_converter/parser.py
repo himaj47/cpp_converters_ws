@@ -15,6 +15,9 @@ import ros2interface.api as interface
 from stm_converter.utils import generate_msg_name, process_non_primitives, get_msg_fields
 from stm_converter.utils import DECLARATION_PREFIX, VECTOR_TYPE_PREFIX, VECTOR_TYPE_SUFFIX
 
+import os
+from pathlib import Path
+
 class Parser:
     """Parses C++ header files into ROS 2 `MessageSpecification` objects.
 
@@ -52,10 +55,17 @@ class Parser:
         # Find out the c++ parser
         generator_path, generator_name = utils.find_xml_generator()
 
+        include_paths = []
+        for prefix in os.environ["CMAKE_PREFIX_PATH"].split(":"):
+            inc = Path(prefix) / "include"
+            if inc.exists():
+                include_paths.append(str(inc))
+
         # Configure the xml generator
         xml_generator_config = parser.xml_generator_configuration_t(
             xml_generator_path=generator_path,
             xml_generator=generator_name,
+            include_paths=include_paths,
             cflags="-Wno-pragma-once-outside-header")
         
         self.filename = filename
@@ -178,7 +188,7 @@ class Parser:
 
                     elif str(canonical_type).startswith(VECTOR_TYPE_PREFIX):
                         vector_type = str(canonical_type).strip(VECTOR_TYPE_PREFIX).strip(VECTOR_TYPE_SUFFIX)
-                        context_pkg, msg_fields, field_type = process_non_primitives(vector_type, True, self.pkg_name, deps=self.deps)
+                        context_pkg, msg_fields, field_type = process_non_primitives(vector_type, True, self.pkg_name, deps=self.deps, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
 
                     else:
                         print(f"weird type found - {var.decl_type} - canonical type - {canonical_type}")
