@@ -45,7 +45,7 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
         message(WARNING "Package Dependencies: ${PKG_DEPENDENCIES}")
         string(REPLACE ";" " " deps_str "${PKG_DEPENDENCIES}")
         list(APPEND cmd --deps "${deps_str}")
-        set(MSG_GENT_PKG_DEPENDENCIES ${PKG_DEPENDENCIES} PARENT_SCOPE)
+        set(MSG_GEN_PKG_DEPENDENCIES ${PKG_DEPENDENCIES} PARENT_SCOPE)
     endif()
 
     set(msg_src "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
@@ -79,15 +79,15 @@ endfunction()
 
 macro(convert_to_ros_msg TARGET_NAME FILE)
 
-    convert_to_ros_msg_helper(${TARGET_NAME} ${FILE})
+    convert_to_ros_msg_helper(${TARGET_NAME} ${FILE} ${ARGV})
 
     message("PROJECT_NAME: ${PROJECT_NAME}")
     message("MSG_FILES: ${MSG_GEN_MSG_FILES}")
-    message("PKG_DEPENDENCIES: ${MSG_GENT_PKG_DEPENDENCIES}")
+    message("PKG_DEPENDENCIES: ${MSG_GEN_PKG_DEPENDENCIES}")
 
     rosidl_generate_interfaces(${PROJECT_NAME}
         ${MSG_GEN_MSG_FILES}
-        DEPENDENCIES ${MSG_GENT_PKG_DEPENDENCIES}
+        DEPENDENCIES ${MSG_GEN_PKG_DEPENDENCIES}
     )
 
     ament_export_dependencies(rosidl_default_runtime)
