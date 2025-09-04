@@ -1,0 +1,2 @@
+{{namespace}}::{{struct}} element;
+rclcpp::TypeAdapter<{{namespace}}::{{struct}}, {{pkg}}::msg::{{msg}}>::convert_to_custom(elem, element);

@@ -1,7 +1,4 @@
-#pragma once
-#include <rclcpp/type_adapter.hpp>
-#include "{{interface_name}}/msg/{{struct_name}}.hpp"
-#include "{{interface_name}}/headers/{{header}}.hpp"
+{{includes}}
 
 template<>
 struct rclcpp::TypeAdapter<{{namespace}}::{{struct_name}}, {{interface_name}}::msg::{{msg_file_name}}>

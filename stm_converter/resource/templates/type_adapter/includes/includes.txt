@@ -1,0 +1,6 @@
+#pragma once
+#include <rclcpp/type_adapter.hpp>
+#include "{{interface_name}}/msg/{{struct_name}}.hpp"
+#include "{{interface_name}}/headers/{{header}}.hpp"
+
+{{extras}}
