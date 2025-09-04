@@ -12,7 +12,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/resource/templates',
-        glob.glob('resource/templates/*.txt')),
+        glob.glob('resource/templates/**/*.txt', recursive=True)),
     ],
     install_requires=['setuptools'],
     package_data={
