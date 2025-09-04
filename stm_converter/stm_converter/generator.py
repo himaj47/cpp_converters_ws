@@ -19,6 +19,43 @@ import os
 from stm_converter.utils import get_msg_fields
 from stm_converter.utils import MESSAGE_FILE_EXTENSION, PRIMITIVE_TYPES
 
+
+def check_for_extras(msg_content: dict, template_env: Environment, file_path: str):
+    extras = ""
+    template = template_env.get_template("extras.txt")
+    extras_properties = {}
+
+    for field, properties in msg_content.items():
+        if properties[0] not in PRIMITIVE_TYPES: # update the index 
+
+            # find msg description in registry
+            non_primitive = properties[0]
+
+            with open(file_path, 'r') as f:
+                data = yaml.safe_load(f) or {}
+
+                if not data:
+                    raise ValueError(f"registry is empty!!")
+                
+                try: 
+                    header = data[non_primitive]["header"]
+                    package = data[non_primitive]["package"]
+
+                    # mapping of msg name to its namespace and struct name
+                    temp = {non_primitive: [data[non_primitive]["namespace"], data[non_primitive]["struct_name"]]}
+                    extras_properties.update(temp)
+
+                    context = {"header": header,
+                               "pkg": package}
+                    
+                    extras += template.render(context) + "\n"
+
+                except KeyError:
+                    print(f"msg description for {non_primitive} does not exists in the registry!!")
+
+    return extras, extras_properties
+
+
 class Generator: 
     """Generates ROS 2 message files and type adapters from parsed C++ structs.
 
@@ -48,6 +85,8 @@ class Generator:
 
         self.header_name_ = header
         self.ns = namespace
+
+        # package name
         self.interface_name = interface_name
 
         # self.msg_filename_ = msg.msg_name 
@@ -55,6 +94,8 @@ class Generator:
         self.interface_type_ = None
         self.msg = msg
         self.struct_name = struct_name
+
+        self.non_primitive_info_ = {}
 
 
     def gen_msgs(self, file: str):
@@ -92,21 +133,132 @@ class Generator:
         Args:
             - ``file`` (str): Output directory and prefix for the adapter file names.
         """
+        # path to registry
+        file_path = os.path.expanduser("~/.registry.yaml")
+
+        # include headers
+        # includes_template = self.env_.get_template("type_adapter/includes/includes.txt")
+        includes_template = self.env_.get_template("includes.txt")
+        include_content = []
+        struct_count = 0
+
+        for msg_content in self.msg_content_: 
+
+            # check for any extra includes
+            extras, extras_properties = check_for_extras(msg_content, self.env_, file_path)
+            self.non_primitive_info_.update(extras_properties)
+
+            context = {"interface_name": self.interface_name,
+                       "struct_name": self.struct_name[struct_count],
+                       "header": self.header_name_,
+                       "extras": extras}
+
+            struct_count += 1
+
+            temp = includes_template.render(context)
+            include_content.append(temp)
+
+
+        non_array_types = self.env_.get_template("non_array_types.txt")
+        adapter = self.env_.get_template("adapter.txt")
+
+        loop = self.env_.get_template("loop.txt")
+        push_back = self.env_.get_template("push_back.txt")
+        np_push_back = self.env_.get_template("np_push_back.txt")
+
+        to_ros_msg = self.env_.get_template("adapter__to_ros.txt")
+        to_custom = self.env_.get_template("adapter__to_custom.txt")
+
+        type_adapter = self.env_.get_template("type_adapter1.txt")
+
+        # convertion block
+        type_adapters = []
+        msg_count = 0
+
+        for msg_content in self.msg_content_:
+            content = ""
+            non_primitives__to_ros = ""
+            non_primitives__to_custom = ""
+
+            for field, info in msg_content.items():
+                temp = ""
+
+                # non array primitive types
+                if not info[1] and not info[-1]:
+                    context = {"field_name": field}
+                    temp = non_array_types.render(context) + "\n"
+
+                # non array non primitive types
+                elif not info[1]:
+                    context = {"namespace": self.non_primitive_info_[info[0]][0],
+                               "struct": self.non_primitive_info_[info[0]][1],
+                               "pkg": info[3],
+                               "msg": info[0],
+                               "field_name": field}
+
+                    temp = adapter.render(context) + "\n"
+
+                # array primitive types
+                elif info[1] and not info[-1]:
+                    context = {"field_name": field}
+                    temp = push_back.render(context)
+
+                    context = {"field_name": field,
+                               "content": temp}
+                    temp = loop.render(context)
+
+                # array non primitve types
+                else:
+                    context = {"pkg": info[3],
+                               "msg": info[0],
+                               "namespace": self.non_primitive_info_[info[0]][0],
+                               "struct": self.non_primitive_info_[info[0]][1],
+                               }
+                    
+                    temp_render = to_ros_msg.render(context)
+
+                    push_back_context = {"field_name": field}
+                    temp_push_back = np_push_back.render(push_back_context)
+                    temp_render += "\n" + temp_push_back
+
+                    loop_context = {"field_name": field,
+                               "content": temp_render}
+                    
+                    temp__to_ros = loop.render(loop_context)
+
+
+                    temp_render = to_custom.render(context)
+                    temp_render += "\n" + temp_push_back
+
+                    loop_context["content"] = temp_render
+                    temp__to_custom = loop.render(loop_context)
+
+                    non_primitives__to_ros += temp__to_ros
+                    non_primitives__to_custom += temp__to_custom
+
+                content += temp
+            
+            context = {"msg": self.msg[msg_count].msg_name,
+                       "struct_name": self.struct_name[msg_count],
+                       "namespace": self.ns, # currently assuming that all structs are under the same namespace
+                       "interface_name": self.interface_name,
+                       "primitives": content,
+                       "to_ros_msg": non_primitives__to_ros,
+                       "to_custom": non_primitives__to_custom,
+                       "includes": include_content[msg_count]}
+            
+            full_content = type_adapter.render(context)
+            type_adapters.append(full_content)
+            msg_count += 1
+
 
         msg_count = 0
         template = self.env_.get_template("type_adapter.txt")
 
-        for msg_content in self.msg_content_:
-            context = {"header": self.header_name_, 
-                    "msg_file_name": self.msg[msg_count].msg_name,
-                    "struct_name": self.struct_name[msg_count],
-                    "msg": msg_content,
-                    "namespace": self.ns, # currently assuming that all structs are under the same namespace
-                    "interface_name": self.interface_name
-                    }
+        for content in type_adapters:
             
             with open(file + self.struct_name[msg_count] + "_type_adapter.hpp", mode="w", encoding="utf-8") as output:
-                output.write(template.render(context))
+                output.write(content)
             
             msg_count += 1
 
@@ -117,18 +269,41 @@ class Generator:
         Args:
             - ``file`` (str): Output directory and prefix for the msg description file names.
         """
-        content = {}
 
+        # create registry if doesn't exists
+        file_path = os.path.expanduser("~/.registry.yaml")
+
+        if not os.path.exists(file_path):
+            with open(file_path, "w") as f:
+                yaml.dump({}, f)
+
+        else:
+            print(f"Registry already exists: {file_path}")
+
+        # read registry
+        with open(file_path, "r") as f:
+            data = yaml.safe_load(f) or {}
+
+        count = 0
         for msg in self.msg:
-            content["header"] = self.header_name_ + '.hpp'
-            content["fields"] = {}
+            content = {msg.msg_name: {}}
+            content[msg.msg_name].update({"package": self.interface_name})
+            content[msg.msg_name].update({"header": self.header_name_ + '.hpp'})
+            content[msg.msg_name].update({"fields": {}})
+
             for field in msg.fields:
                 if field.type.type not in PRIMITIVE_TYPES:
                     pass
-                content["fields"].update({field.name: field.type.type})
+                content[msg.msg_name]["fields"].update({field.name: field.type.type})
+            
+            content[msg.msg_name].update({"namespace": self.ns})
+            content[msg.msg_name].update({"struct_name": self.struct_name[count]})
 
-            with open(file + self.header_name_ + '_desc.yaml', mode="w", encoding="utf-8") as output:
-                    output.write(yaml.dump(content))
+            data.update(content)
+            count += 1
+
+        with open(file_path, 'w') as f:
+            f.write(yaml.dump(data))
 
 
     def check_existance(self): # use find_content_pkg function from xml_parser
