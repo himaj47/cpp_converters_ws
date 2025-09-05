@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "package_one/package_one/headers/pkg_one_msg.hpp"
+#include "package_one/headers/pkg_one_msg.hpp"
 
 namespace nspace {
     struct pkg_two_msg
