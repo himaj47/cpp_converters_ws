@@ -31,7 +31,7 @@ class MinimalPublisher : public rclcpp::Node
       msg_two.d.push_back(msg_one);
 
       RCLCPP_INFO(this->get_logger(), "Publishing: 'c = %f' & 'a = %d'", msg_two.c, msg_one.a);
-      publisher_->publish(test_msg);
+      publisher_->publish(msg_two);
     }
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::Publisher<myAdaptedType>::SharedPtr publisher_;
