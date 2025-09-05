@@ -57,7 +57,8 @@ class Parser:
 
         include_paths = []
         for prefix in os.environ["CMAKE_PREFIX_PATH"].split(":"):
-            inc = Path(prefix) / "include"
+            parts = prefix.split("/")
+            inc = Path(prefix) / "include" / parts[-1]
             if inc.exists():
                 include_paths.append(str(inc))
 
