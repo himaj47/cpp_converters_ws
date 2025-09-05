@@ -38,7 +38,7 @@ def check_for_extras(msg_content: dict, template_env: Environment, file_path: st
                     raise ValueError(f"registry is empty!!")
                 
                 try: 
-                    header = data[non_primitive]["header"]
+                    header = data[non_primitive]["header"].split(".")[0] + "_type_adapter.hpp"
                     package = data[non_primitive]["package"]
 
                     # mapping of msg name to its namespace and struct name
