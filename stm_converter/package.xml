@@ -14,6 +14,8 @@
 
   <exec_depend>castxml</exec_depend>
   <exec_depend>python3-jinja2</exec_depend>
+  <exec_depend>ros2interface</exec_depend>
+  <exec_depend>rosidl-adapter</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
