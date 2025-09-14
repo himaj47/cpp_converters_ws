@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <cstdint>
+
 namespace ns1 {
     struct type_from_one
     {
