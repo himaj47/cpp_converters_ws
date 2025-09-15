@@ -67,7 +67,6 @@ class Parser:
             xml_generator_path=generator_path,
             xml_generator=generator_name,
             include_paths=include_paths,
-            compiler_path="/usr/bin/g++-11",
             cflags="-Wno-pragma-once-outside-header")
         
         self.filename = filename
