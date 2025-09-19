@@ -11,13 +11,9 @@ It integrates with `rosidl_adapter` to parse existing `.msg` files and
 handles recursive resolution of nested message fields.
 """
 
-from rosidl_adapter.parser import MessageSpecification, Type, Field
+from rosidl_adapter.parser import MessageSpecification
 from rosidl_adapter.parser import PRIMITIVE_TYPES, parse_message_file
 
-import ros2interface.api as interface
-
-import os
-import yaml
 import re
 
 VECTOR_TYPE_PREFIX = "std::vector<"
@@ -203,11 +199,6 @@ def find_context_pkg(typename: str, header_name: str=None, pkg_name: str=DEFAULT
     context_pkg = ''
     pathToFile = ''
     already_exists = False
-    
-    # checks the dependencies
-    msg = typename + MESSAGE_FILE_EXTENSION
-    exists = False
-    dependencies = []
 
     is_present = False
     # all builtin and generated msgs
