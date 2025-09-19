@@ -12,7 +12,7 @@ from pygccxml import parser
 from rosidl_adapter.parser import MessageSpecification, Type, Field
 import ros2interface.api as interface
 
-from stm_converter.utils import generate_msg_name, process_non_primitives, get_msg_fields
+from stm_converter.utils import generate_msg_name, process_non_primitives
 from stm_converter.utils import DECLARATION_PREFIX, VECTOR_TYPE_PREFIX, VECTOR_TYPE_SUFFIX
 
 import os
@@ -150,41 +150,40 @@ class Parser:
                     # We need the underlying canoncical type
                     canonical_type = declarations.type_traits.remove_alias(var.decl_type)
 
-                    # TODO: use isinstance() instead of type()
-                    if type(canonical_type) == declarations.cpptypes.char_t:
+                    if isinstance(canonical_type, declarations.cpptypes.char_t):
                         field_type = "char"
 
-                    elif type(canonical_type) == declarations.cpptypes.bool_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.bool_t):
                         field_type = "bool"
 
-                    elif type(canonical_type) == declarations.cpptypes.signed_char_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.signed_char_t):
                         field_type = "int8"
 
-                    elif type(canonical_type) == declarations.cpptypes.unsigned_char_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.unsigned_char_t):
                         field_type = "uint8"
 
-                    elif type(canonical_type) == declarations.cpptypes.short_int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.short_int_t):
                         field_type = "int16"
 
-                    elif type(canonical_type) == declarations.cpptypes.short_unsigned_int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.short_unsigned_int_t):
                         field_type = "uint16"    
 
-                    elif type(canonical_type) == declarations.cpptypes.int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.int_t):
                         field_type = "int32"
 
-                    elif type(canonical_type) == declarations.cpptypes.unsigned_int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.unsigned_int_t):
                         field_type = "uint32"
 
-                    elif type(canonical_type) == declarations.cpptypes.long_int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.long_int_t):
                         field_type = "int64"
 
-                    elif type(canonical_type) == declarations.cpptypes.long_unsigned_int_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.long_unsigned_int_t):
                         field_type = "uint64"
                     
-                    elif type(canonical_type) == declarations.cpptypes.float_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.float_t):
                         field_type = "float32"
 
-                    elif type(canonical_type) == declarations.cpptypes.double_t:
+                    elif isinstance(canonical_type, declarations.cpptypes.double_t):
                         field_type = "float64"
 
                     elif str(canonical_type).startswith(VECTOR_TYPE_PREFIX):
