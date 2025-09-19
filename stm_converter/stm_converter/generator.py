@@ -21,6 +21,17 @@ from stm_converter.utils import MESSAGE_FILE_EXTENSION, PRIMITIVE_TYPES
 
 
 def check_for_extras(msg_content: dict, template_env: Environment, file_path: str):
+    """Verifies whether the target message contains any non-primitive types, and if it does, returns the necessary header include lines.
+
+    Args:
+        ``msg_content``: message information
+        ``template_env``: Jinja template environment to get templates
+        ``file_path``: Path to registry
+
+    Returns:
+        ``tuple[str,dict]``: template rendered string (include headers lines), message properties (namespace, struct name)
+    """
+
     extras = ""
     template = template_env.get_template("extras.txt")
     extras_properties = {}
@@ -29,13 +40,13 @@ def check_for_extras(msg_content: dict, template_env: Environment, file_path: st
         if properties[0] not in PRIMITIVE_TYPES: # update the index 
 
             # find msg description in registry
-            non_primitive = properties[0]
+            non_primitive = properties[0] # msg name
 
             with open(file_path, 'r') as f:
                 data = yaml.safe_load(f) or {}
 
                 if not data:
-                    raise ValueError(f"registry is empty!!")
+                    raise ValueError("registry is empty!!")
                 
                 try: 
                     header = data[non_primitive]["header"].split(".")[0] + "_type_adapter.hpp"
@@ -128,7 +139,7 @@ class Generator:
     def gen_type_adapter(self, file: str):
         """Generate C++ type adapter headers for the generated messages.
 
-        Uses the `type_adapter.txt` Jinja2 template to generate type adapter
+        Uses Jinja2 templates to generate type adapters
 
         Args:
             - ``file`` (str): Output directory and prefix for the adapter file names.
@@ -136,12 +147,27 @@ class Generator:
         # path to registry
         file_path = os.path.expanduser("~/.registry.yaml")
 
-        # include headers
-        # includes_template = self.env_.get_template("type_adapter/includes/includes.txt")
+        # include headers template
         includes_template = self.env_.get_template("includes.txt")
-        include_content = []
+
+        # helper templates
+        non_array_types = self.env_.get_template("non_array_types.txt")
+        adapter = self.env_.get_template("adapter.txt")
+
+        loop = self.env_.get_template("loop.txt")
+        push_back = self.env_.get_template("push_back.txt")
+        np_push_back = self.env_.get_template("np_push_back.txt")
+
+        to_ros_msg = self.env_.get_template("adapter__to_ros.txt")
+        to_custom = self.env_.get_template("adapter__to_custom.txt")
+
+        type_adapter = self.env_.get_template("type_adapter1.txt")
+
+
+        include_header_content = []
         struct_count = 0
 
+        # collecting headers info
         for msg_content in self.msg_content_: 
 
             # check for any extra includes
@@ -156,22 +182,10 @@ class Generator:
             struct_count += 1
 
             temp = includes_template.render(context)
-            include_content.append(temp)
+            include_header_content.append(temp)
+        
 
-
-        non_array_types = self.env_.get_template("non_array_types.txt")
-        adapter = self.env_.get_template("adapter.txt")
-
-        loop = self.env_.get_template("loop.txt")
-        push_back = self.env_.get_template("push_back.txt")
-        np_push_back = self.env_.get_template("np_push_back.txt")
-
-        to_ros_msg = self.env_.get_template("adapter__to_ros.txt")
-        to_custom = self.env_.get_template("adapter__to_custom.txt")
-
-        type_adapter = self.env_.get_template("type_adapter1.txt")
-
-        # convertion block
+        # generating full rendered content using helper templates 
         type_adapters = []
         msg_count = 0
 
@@ -245,16 +259,15 @@ class Generator:
                        "primitives": content,
                        "to_ros_msg": non_primitives__to_ros,
                        "to_custom": non_primitives__to_custom,
-                       "includes": include_content[msg_count]}
+                       "includes": include_header_content[msg_count]}
             
             full_content = type_adapter.render(context)
             type_adapters.append(full_content)
             msg_count += 1
 
 
+        # writing the generated content to files
         msg_count = 0
-        template = self.env_.get_template("type_adapter.txt")
-
         for content in type_adapters:
             
             with open(file + self.struct_name[msg_count] + "_type_adapter.hpp", mode="w", encoding="utf-8") as output:
@@ -285,6 +298,7 @@ class Generator:
             data = yaml.safe_load(f) or {}
 
         count = 0
+        # collecting message informations 
         for msg in self.msg:
             content = {msg.msg_name: {}}
             content[msg.msg_name].update({"package": self.interface_name})
@@ -302,6 +316,7 @@ class Generator:
             data.update(content)
             count += 1
 
+        # write it to a file
         with open(file_path, 'w') as f:
             f.write(yaml.dump(data))
 
