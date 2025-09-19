@@ -279,7 +279,7 @@ def process_non_primitives(typename: str, is_array=False, pkg_name:str =DEFAULT_
             namespace, field_type, typename = remove_namespace(field_type) 
 
             type_ = check_if_primitve(typename)
-            # raise TypeError(f"field_type = {field_type} and type_ = {type_}")
+
             if type_:
                 if is_array: type_ += "[]"
                 return context_pkg, msg_fields, type_
