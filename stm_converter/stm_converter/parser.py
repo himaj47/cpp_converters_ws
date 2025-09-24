@@ -188,11 +188,11 @@ class Parser:
 
                     elif str(canonical_type).startswith(VECTOR_TYPE_PREFIX):
                         vector_type = str(canonical_type).strip(VECTOR_TYPE_PREFIX).strip(VECTOR_TYPE_SUFFIX)
-                        context_pkg, msg_fields, field_type = process_non_primitives(vector_type, True, self.pkg_name, deps=self.deps, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
+                        context_pkg, msg_fields, field_type = process_non_primitives(vector_type, True, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
 
                     else:
                         print(f"weird type found - {var.decl_type} - canonical type - {canonical_type}")
-                        context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), pkg_name=self.pkg_name, deps=self.deps, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
+                        context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
 
                     test_canonical_types.append(field_type)
                     field_type = Type(field_type, context_package_name=context_pkg)
