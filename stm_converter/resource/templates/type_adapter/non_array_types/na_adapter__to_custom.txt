@@ -1,0 +1,1 @@
+rclcpp::TypeAdapter<{{namespace}}::{{struct}}, {{pkg}}::msg::{{msg}}>::convert_to_custom(source.{{field_name}}, destination.{{field_name}});
