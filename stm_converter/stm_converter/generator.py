@@ -152,7 +152,8 @@ class Generator:
 
         # helper templates
         non_array_types = self.env_.get_template("non_array_types.txt")
-        adapter = self.env_.get_template("adapter.txt")
+        non_array_to_ros = self.env_.get_template("na_adapter__to_ros.txt")
+        non_array_to_custom = self.env_.get_template("na_adapter__to_custom.txt")
 
         loop = self.env_.get_template("loop.txt")
         push_back = self.env_.get_template("push_back.txt")
@@ -161,7 +162,7 @@ class Generator:
         to_ros_msg = self.env_.get_template("adapter__to_ros.txt")
         to_custom = self.env_.get_template("adapter__to_custom.txt")
 
-        type_adapter = self.env_.get_template("type_adapter1.txt")
+        type_adapter = self.env_.get_template("type_adapter.txt")
 
 
         include_header_content = []
@@ -210,7 +211,8 @@ class Generator:
                                "msg": info[0],
                                "field_name": field}
 
-                    temp = adapter.render(context) + "\n"
+                    non_primitives__to_ros += non_array_to_ros.render(context) + "\n"
+                    non_primitives__to_custom += non_array_to_custom.render(context) + "\n"
 
                 # array primitive types
                 elif info[1] and not info[-1]:
