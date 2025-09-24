@@ -68,7 +68,7 @@ def main():
 
     generator = Generator(parser.struct_name, filename, parser.user_ns, msg=msg, interface_name=pkg_name)
     if generator.check_existance():
-        print(f"msg exists\ntype: {generator.interface_type_}")
+        raise FileExistsError(f"msg file exists\ntype: {generator.interface_type_}.msg")
 
     else:
         generator.gen_msgs(msg_with_path)
