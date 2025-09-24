@@ -27,10 +27,8 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
 
     snake_to_pascal("${basename}" out_string)
 
-    # set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
     set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/")
     set(formatted_msg "${CMAKE_CURRENT_BINARY_DIR}:msg/${out_string}.msg")
-    message(WARNING "formatted_msg: ${formatted_msg}")
 
     execute_process(
         COMMAND ros2 pkg prefix ${generator_pkg}
@@ -42,7 +40,6 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     set(cmd ${msg_generator_path} "${FILE}" --out-description "${msg_description}" --out-msg "${ros_msg}" --out-adapter "${type_adapter}" --package "${PROJECT_NAME}")
 
     if(PKG_DEPENDENCIES)
-        message(WARNING "Package Dependencies: ${PKG_DEPENDENCIES}")
         string(REPLACE ";" " " deps_str "${PKG_DEPENDENCIES}")
         list(APPEND cmd --deps "${deps_str}")
         set(MSG_GEN_PKG_DEPENDENCIES ${PKG_DEPENDENCIES} PARENT_SCOPE)
@@ -67,10 +64,6 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     string(REPLACE ";" " " deps_str "${MSG_FILES}")
     string(REPLACE ";" " " deps_str "${TYPE_ADAPTERS}")
 
-    message(WARNING "msg files: ${MSG_FILES}")
-    message(WARNING "type adapter files: ${TYPE_ADAPTERS}")
-
-
     add_custom_target(${TARGET_NAME})
 
     set(MSG_GEN_MSG_FILES "${MSG_FILES}" PARENT_SCOPE)
@@ -83,6 +76,7 @@ macro(convert_to_ros_msg TARGET_NAME FILE)
 
     message("PROJECT_NAME: ${PROJECT_NAME}")
     message("MSG_FILES: ${MSG_GEN_MSG_FILES}")
+    message("TYPE_ADAPTER(S): ${TYPE_ADAPTERS}")
     message("PKG_DEPENDENCIES: ${MSG_GEN_PKG_DEPENDENCIES}")
 
     rosidl_generate_interfaces(${PROJECT_NAME}
@@ -91,20 +85,11 @@ macro(convert_to_ros_msg TARGET_NAME FILE)
     )
 
     ament_export_dependencies(rosidl_default_runtime)
-    # install(
-    #     FILES ${msg_description}
-    #     DESTINATION share/${PROJECT_NAME}/msg_descriptions
-    # )
 
     install(
         FILES ${MSG_GEN_MSG_TYPE_ADAPTERS}
         DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/type_adapters
     )
-
-    # install(
-    #     FILES ${MSG_FILES}
-    #     DESTINATION share/${PROJECT_NAME}/msg
-    # )
 
     install(
         FILES ${FILE}
