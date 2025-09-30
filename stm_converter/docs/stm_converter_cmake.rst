@@ -24,17 +24,17 @@ This package provides CMake function for generating ROS 2 message files and type
       
       - A ROS2 `msg` file under ``msg/``  
       - A type adapter header in ``<build>/type_adapters/``  
-      - A YAML message description in ``<build>/msg_descriptions/``
+      - Message description (added to the registry)
 
    2. Calls ``rosidl_generate_interfaces()`` with the generated `msg` files.  
-   3. Installs generated type adapters and messages into the package’s `share/` folder.
+   3. Installs generated type adapters and messages into the package’s `include/` folder.
 
    **Example:**
 
    .. code-block:: cmake
 
       convert_to_ros_msg(
-        my_struct_generator
+        msg_generator
         include/my_pkg/my_struct.hpp
         DEPENDENCIES my_custom_interfaces
       )
@@ -42,8 +42,27 @@ This package provides CMake function for generating ROS 2 message files and type
    After running ``colcon build``, this will produce:
 
    - ``msg/MyStruct.msg``  
-   - ``install/my_pkg/share/my_pkg/type_adapters/MyStruct_type_adapter.hpp``  
+   - ``install/my_pkg/include/type_adapters/my_struct_type_adapter.hpp``  
 
+   **Note:**
+
+   - Make sure to add a namespace.  
+   - Make sure the struct name is the same as the header file name.  
+
+   For example:
+
+   .. code-block:: cpp
+
+      #pragma once
+      #include <vector>
+
+      namespace ns {
+          struct pkg_one_msg
+          {
+              int a;
+              std::vector<int> b;
+          };
+      };
 
 
 Here is the source code for the ``convert_to_ros_msg`` function:
