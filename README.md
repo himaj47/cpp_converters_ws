@@ -19,7 +19,7 @@ This removes the need for developers to manually define message files or boilerp
 - **Examples & tests**:  
   - Demonstrated how to convert structs into ROS2 messages. 
   - Demonstrated publishing/subscribing with generated type adapters.    
-  - Tests for message descriptions
+  - Tests for message descriptions that are added to the registry.
 
 ---
 
