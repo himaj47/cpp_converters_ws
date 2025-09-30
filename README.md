@@ -23,12 +23,12 @@ This removes the need for developers to manually define message files or boilerp
 
 ---
 
-## 🔮 What’s Left To Do
+## What’s Left To Do
 
 - Improve **ROS2 Jazzy support**.  
-- Handling `opaque types`
-- Add CI/CD for building + testing across ROS distros.  
-- Optimize error handling in the generator.  
+- Handling `opaque types` while generating artifacts.
+- CI/CD for building + testing across ROS distros.  
+- Optimize error handling in generator.  
 
 ---
 
