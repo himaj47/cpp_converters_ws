@@ -6,6 +6,8 @@ This project was developed during **Google Summer of Code (GSoC) 2025** under th
 
 Organization: **Open Robotics**
 
+---
+
 ## Introduction
 
 This package allow users to convert their **C/C++ structs into ROS2 messages and generate type adapters** automatically.  
