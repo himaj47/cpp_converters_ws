@@ -2,8 +2,8 @@
 
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://himaj47.github.io/cpp_converters_doc/)
 
-This project was developed during **Google Summer of Code (GSoC) 2025** under the guidance of Janosch Machowinski.
-Organization: Open Robotics
+This project was developed during **Google Summer of Code (GSoC) 2025** under the guidance of Janosch Machowinski. 
+Organization: **Open Robotics**
 
 ## Introduction
 
