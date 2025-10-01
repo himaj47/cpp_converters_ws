@@ -2,6 +2,11 @@
 
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://himaj47.github.io/cpp_converters_doc/)
 
+This project was developed during **Google Summer of Code (GSoC) 2025** under the guidance of Janosch Machowinski.
+Organization: Open Robotics
+
+## Introduction
+
 This package allow users to convert their **C/C++ structs into ROS2 messages and generate type adapters** automatically.  
 This removes the need for developers to manually define message files or boilerplate conversion logic, making it easier to use C/C++ structures directly in ROS2.
 
