@@ -30,9 +30,9 @@ def main():
 
     parser.add_argument("filename", help="header file")
     parser.add_argument("-ns", "--namespace", help="namespace")
-    parser.add_argument("-o", "--out-description", help="message description YAML")
-    parser.add_argument("-m", "--out-msg", help="ros message")
-    parser.add_argument("-t", "--out-adapter", help="type adaption")
+    parser.add_argument("-o", "--out-description", help="path to put the generated message description YAML")
+    parser.add_argument("-m", "--out-msg", help="path to put the generated ros message")
+    parser.add_argument("-t", "--out-adapter", help="path to put the generated type adapter")
     parser.add_argument("-p", "--package", help="ROS package name")
     parser.add_argument("-d", "--deps", help="ROS package dependecies")
 
@@ -42,6 +42,8 @@ def main():
 
     relative_file_path = str(args.filename)
     path = Path(relative_file_path)
+
+    # filename without extension
     filename = path.stem
 
     namespace = ""

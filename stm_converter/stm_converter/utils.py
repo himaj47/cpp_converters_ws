@@ -127,7 +127,7 @@ def get_msg_fields(msg: MessageSpecification):
         all_fields[field.name] = [field.type.type, field.type.is_array, field.type.array_size, field.type.pkg_name]
 
         try:
-            all_fields[field.name].append(field.msg_fields)
+            all_fields[field.name].append(field.msg_fields) # "msg_fields" class member is created dynamically or at runtime in exception handling
 
         except Exception as e:
             msg_fields = {}
@@ -135,7 +135,8 @@ def get_msg_fields(msg: MessageSpecification):
             if field.type.type not in PRIMITIVE_TYPES:
                 _, fields, _ = process_non_primitives(typename=field.type.type, is_array=field.type.is_array, pkg_name=field.type.pkg_name)
                 msg_fields.update(fields)
-                
+            
+            # creating "msg_fields" class member dynamically or at runtime
             field.msg_fields = msg_fields
             all_fields[field.name].append(field.msg_fields)
 
@@ -184,7 +185,9 @@ def find_context_pkg(typename: str, msg_interfaces=None, builtin_interfaces=None
         ``NameError``: If the message type is not found in dependencies.
     """
 
+    # context pkg is the name of the inteface that holds that msg
     context_pkg = ''
+    # path to msg file
     pathToFile = ''
 
     is_present = False
@@ -259,8 +262,9 @@ def process_non_primitives(typename: str, is_array=False, msg_interfaces=None, b
     if not field_type:
         field_type += typename
 
-        # assuming namespace typed struct
+        # assuming namespace typed field
         if field_type.find(SCOPE_RESOLUTION_OPR) != -1:
+            # field_type is the msg name generated using original field type (typename)
             namespace, field_type, typename = remove_namespace(field_type) 
 
             type_ = check_if_primitve(typename)
@@ -269,11 +273,14 @@ def process_non_primitives(typename: str, is_array=False, msg_interfaces=None, b
                 if is_array: type_ += "[]"
                 return context_pkg, msg_fields, type_
 
-        # if it's not primitive
+        # handling if it's not primitive
+        # [in] "field_type" passed is the generated msg name from the original field type (typename)
+        # [out] "pkg" is the interface that holds the msg
+        # [out] "path" is the path to that msg
         pkg, path = find_context_pkg(field_type, msg_interfaces, builtin_interfaces)
         context_pkg += pkg
         msg_fields = get_fields(pkg_name=context_pkg, path=path, name=field_type)
 
-    if is_array: field_type += "[]"
+    if is_array: field_type += "[]" 
 
     return context_pkg, msg_fields, field_type

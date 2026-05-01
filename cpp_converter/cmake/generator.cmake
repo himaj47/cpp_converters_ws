@@ -8,13 +8,19 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     set(one_value_keywords)
     set(deps DEPENDENCIES)
 
+    # "PKG" is the prefix
+    # eg. PKG_{deps} => PKG_DEPENDENCIES
     cmake_parse_arguments(PARSE_ARGV 0 PKG
         "${options}" "${one_value_keywords}" "${deps}"
     )
 
+    # header file base name without extension
     get_filename_component(basename ${FILE} NAME_WE)
+
+    # header file with extension and prefix paths removed
     get_filename_component(headerFile ${FILE} NAME)
 
+    # msg decription and type adapter file names to be used for generation
     set(description_file "${basename}_desc.yaml")
     set(type_adapter_file "${basename}_type_adapter.hpp")
 
@@ -22,31 +28,44 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions")
     file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/type_adapters")
 
+    # path to put the generated msg decription YAML
     set(msg_description "${CMAKE_CURRENT_BINARY_DIR}/msg_descriptions/")
+    # path to put generated type adapter
     set(type_adapter "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/")
 
+    # eg. msg_one -> MsgOne (represents the msg file name to be used while generation)
     snake_to_pascal("${basename}" out_string)
 
+    # path to put the generated msg file
     set(ros_msg "${CMAKE_CURRENT_SOURCE_DIR}/msg/")
+
+    # format used by ROSIDL : <package_path>:<relative_interface_path>
     set(formatted_msg "${CMAKE_CURRENT_BINARY_DIR}:msg/${out_string}.msg")
 
+    # this finds where stm_converter is installed and returns it prefix path
     execute_process(
         COMMAND ros2 pkg prefix ${generator_pkg}
         OUTPUT_VARIABLE stm_converter_prefix
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
+
+    # executable to call (./stm_converter -> which calls main.py) 
     set(msg_generator_path "${stm_converter_prefix}/lib/${generator_pkg}/${generator_pkg}")
 
+    # build command to execute
     set(cmd ${msg_generator_path} "${FILE}" --out-description "${msg_description}" --out-msg "${ros_msg}" --out-adapter "${type_adapter}" --package "${PROJECT_NAME}")
 
     if(PKG_DEPENDENCIES)
+        # e.g., "pkg1;pkg2;pkg3" -> e.g., "pkg1 pkg2 pkg3"
         string(REPLACE ";" " " deps_str "${PKG_DEPENDENCIES}")
+        # append the dependencies to the command cmd
         list(APPEND cmd --deps "${deps_str}")
         set(MSG_GEN_PKG_DEPENDENCIES ${PKG_DEPENDENCIES} PARENT_SCOPE)
     endif()
 
     set(msg_src "${CMAKE_CURRENT_SOURCE_DIR}/msg/${out_string}.msg")
 
+    # executes the built command cmd
     execute_process(
         COMMAND ${cmd}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -55,6 +74,7 @@ function(convert_to_ros_msg_helper TARGET_NAME FILE)
     set(MSG_FILES "")
     set(TYPE_ADAPTERS "")
 
+    # retrieve all the generated msg files and type adapters
     file(GLOB_RECURSE MSG_FILES_RECURSIVE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "msg/*.msg")
     file(GLOB_RECURSE TYPE_ADAPTERS_RECURSIVE "${CMAKE_CURRENT_BINARY_DIR}/type_adapters/*_type_adapter.hpp")
 
@@ -79,6 +99,7 @@ macro(convert_to_ros_msg TARGET_NAME FILE)
     message("TYPE_ADAPTER(S): ${TYPE_ADAPTERS}")
     message("PKG_DEPENDENCIES: ${MSG_GEN_PKG_DEPENDENCIES}")
 
+    # register the generated msg files with ROSIDL
     rosidl_generate_interfaces(${PROJECT_NAME}
         ${MSG_GEN_MSG_FILES}
         DEPENDENCIES ${MSG_GEN_PKG_DEPENDENCIES}
@@ -86,11 +107,13 @@ macro(convert_to_ros_msg TARGET_NAME FILE)
 
     ament_export_dependencies(rosidl_default_runtime)
 
+    # install the generated type adapter
     install(
         FILES ${MSG_GEN_MSG_TYPE_ADAPTERS}
         DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/type_adapters
     )
 
+    # install the header file passed as argument
     install(
         FILES ${FILE}
         DESTINATION include/${PROJECT_NAME}/${PROJECT_NAME}/headers

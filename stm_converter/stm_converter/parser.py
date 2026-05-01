@@ -55,6 +55,7 @@ class Parser:
         # Find out the c++ parser
         generator_path, generator_name = utils.find_xml_generator()
 
+        # include paths for castxml to for header files
         include_paths = []
         for prefix in os.environ["CMAKE_PREFIX_PATH"].split(":"):
             parts = prefix.split("/")
@@ -67,7 +68,11 @@ class Parser:
             xml_generator_path=generator_path,
             xml_generator=generator_name,
             include_paths=include_paths,
-            cflags="-Wno-pragma-once-outside-header")
+            cflags="-Wno-pragma-once-outside-header " ## Silences warning - "#pragma once in main file" when headers are parsed individually
+                   "-std=c++17 "                      ## Ensure C++17 standard is used for parsing
+                   "-fsized-deallocation "            ## Required for GCC 13+ / Ubuntu 24.04 system headers
+                   "-D'__assume__(cond)='"            ## No-op MSVC-style optimization macros found in cross-platform headers
+        )
         
         self.filename = filename
         self.namespace = namespace
@@ -76,14 +81,18 @@ class Parser:
         # don't need this anymore
         self.deps = dependencies
 
-        self.ns = None
-        self.user_ns = ""
+        self.ns = None    # holds reference to user namespace declaration
+        self.user_ns = "" # namespace in the user header file 
         self.struct_name = list()
 
+        # holds message interfaces from dependencies
+        # holds them as a dictionary where keys are package names and values are lists of interface names.
         self.msg_interfaces = None
 
         self.decls = parser.parse([filename], xml_generator_config)
         self.global_namespace = declarations.get_global_namespace(self.decls)
+
+        # finds all top-level namespaces
         self.namespaces = self.global_namespace.namespaces()
 
         if dependencies != ["None"]:
@@ -92,13 +101,15 @@ class Parser:
             except Exception as e:
                 raise NameError(f"check dependencies!! {e}")
         
+        # Get all packages that generate interfaces.
         self.builtin_interface_pkgs = interface.get_interface_packages()
         
-        # if namespace provided by the user
+        # if namespace provided by the user 
         if namespace:
             self.ns = self.global_namespace.namespace(namespace)
 
         else:
+            # this should be: self.user_ns = self.namespaces[-1].name
             for ns in self.namespaces:
                 self.user_ns = ns.name
 
@@ -118,9 +129,15 @@ class Parser:
             ``list[MessageSpecification]``: A list of message specifications objects
         """
 
+        # holds the generated msg name
         msg_name = ''
+
+        # holds a list of instances of Field class which are the fields of the msg to be generated
         fields = []
+
+        # holds a list of instances of MessageSpecification class which is passed to the generator to generate the final msg
         msgs = []
+
         test_canonical_types = []
         test_msg_names = []
 
@@ -133,12 +150,17 @@ class Parser:
                 temp = {decl.name: {}}
                 self.struct_name.append(decl.name)
 
+                # generates msg name from struct name
                 msg_name = generate_msg_name(decl.name)
                 test_msg_names.append(msg_name)
 
                 test_msg_fields = []
+
+                # context pkg is the interface that holds a msg of any type
+                # eg. std_msgs::msg::Int64 -> context pkg = std_msgs
                 context_pkg = None
 
+                # parse all the variables/fields declared in the struct
                 for var in decl.variables():
                     var_type = ""
 
@@ -186,10 +208,15 @@ class Parser:
                     elif isinstance(canonical_type, declarations.cpptypes.double_t):
                         field_type = "float64"
 
+                    # handling array type non primitive 
                     elif str(canonical_type).startswith(VECTOR_TYPE_PREFIX):
                         vector_type = str(canonical_type).strip(VECTOR_TYPE_PREFIX).strip(VECTOR_TYPE_SUFFIX)
+
+                        # "msg_fields" contains all the fields of non primitive vector_type
+                        # "field_type" is the generated msg name without extension
                         context_pkg, msg_fields, field_type = process_non_primitives(vector_type, True, msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
 
+                    # handling non array type non primitive
                     else:
                         print(f"weird type found - {var.decl_type} - canonical type - {canonical_type}")
                         context_pkg, msg_fields, field_type = process_non_primitives(typename=str(var.decl_type), msg_interfaces=self.msg_interfaces, builtin_interfaces=self.builtin_interface_pkgs)
@@ -197,7 +224,7 @@ class Parser:
                     test_canonical_types.append(field_type)
                     field_type = Type(field_type, context_package_name=context_pkg)
                     field = Field(type_=field_type, name=field_name)
-                    field.msg_fields = msg_fields
+                    field.msg_fields = msg_fields 
                     fields.append(field)
 
                     test_msg_fields.append(msg_fields)
